@@ -8,39 +8,26 @@ import Control.Arrow ((&&&))
 
 type Input = [String]
 
-check :: [Int] -> Bool
-check xs = not (any (< 0) xs) || not (any (> 0) xs)
-
-inRange :: [Int] -> Bool
-inRange xs = not (any ((\x -> x < 1 || x > 3) . abs) xs)
-
-andList :: [Bool] -> [Bool] -> [Bool]
-andList _ [] = []
-andList [] _ = []
-andList (x : xs) (y : ys) = (x && y) : andList xs ys
+safe :: [Int] -> Bool
+safe xs
+  | head diff > 0 = all (\n -> 1 <= n && n <= 3) diff
+  | head diff < 0 = all (\n -> -3 <= n && n <= -1) diff
+  | otherwise = False
+  where
+    diff = zipWith (-) xs (tail xs)
 
 sublists :: [Int] -> [[Int]]
 sublists xs = [take i xs ++ drop (i + 1) xs | i <- [0 .. length xs]]
 
 part1 :: Input -> Int
 part1 xs =
-  let parsed = [map read x | x <- map words xs]
-      pairs = map (zip <*> tail) parsed
-      diff = [map (uncurry (-)) x | x <- pairs]
-      (a, b) = (map check diff, map inRange diff)
-      anded = andList a b
-   in length (filter (== True) anded)
+  let parsed :: [[Int]] = map (map read . words) xs
+   in length $ filter (== True) (map safe parsed)
 
 part2 :: Input -> Int
 part2 xs =
-  let parsed = [map read x | x <- map words xs]
-      subs = map sublists parsed
-      pairs = (map . map) (zip <*> tail) subs
-      diff = (map . map . map) (uncurry (-)) pairs
-      checked = (map . map) check diff
-      ranged = (map . map) inRange diff
-      anded =zipWith andList checked ranged
-   in length (filter (== True) (map or anded))
+  let parsed = map (map read . words) xs
+   in length $ filter (== True) $ map (any safe . sublists) parsed
 
 prepare :: String -> Input
 prepare = lines
