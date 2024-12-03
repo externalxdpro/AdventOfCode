@@ -31,7 +31,7 @@ part1 xs =
       anded = andList a b
    in length (filter (== True) anded)
 
--- part2 :: Input -> [[Bool]]
+part2 :: Input -> Int
 part2 xs =
   let parsed = [map read x | x <- map words xs]
       subs = map sublists parsed
