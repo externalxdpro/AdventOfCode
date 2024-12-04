@@ -9,13 +9,6 @@ import Text.Regex.TDFA (getAllMatches, (=~))
 
 type Input = [String]
 
-extract :: String -> (Int, Int)
-extract str =
-  let reg = "\\(([^)]+)\\)"
-      [a, b] = splitOn "," (str =~ reg)
-      fixed = (read $ drop 1 a, read $ take (length b - 1) b)
-   in fixed
-
 parse :: [[String]] -> [Int]
 parse = f True
   where
@@ -27,16 +20,13 @@ parse = f True
 
 part1 :: String -> Int
 part1 xs =
-  let regex = "mul\\([0-9]+,[0-9]+\\)"
-      matches :: [(Int, Int)] = getAllMatches (xs =~ regex)
-      calls = map (\(i, len) -> take len $ drop i xs) matches
-      extracted = map extract calls
-   in sum $ map (uncurry (*)) extracted
+  let regex = "mul\\(([0-9]+),([0-9]+)\\)"
+   in sum $ parse (xs =~ regex)
 
 part2 :: String -> Int
 part2 xs =
   let regex = "mul\\(([0-9]+),([0-9]+)\\)|do\\(\\)|don't\\(\\)"
-   in sum $ parse $ xs =~ regex
+   in sum $ parse (xs =~ regex)
 
 main :: IO ()
 main = do
