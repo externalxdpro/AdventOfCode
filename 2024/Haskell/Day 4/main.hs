@@ -35,12 +35,10 @@ isCross = any cross . sequence [id, transpose, reverse, reverse . transpose]
     cross _ = False
 
 part1 :: Input -> Int
-part1 xs =
-  let lrDiag = diagonals xs
-      rlDiag = diagonals (map reverse xs)
-      allDirs = concat [lrDiag, rlDiag, xs, transpose xs]
-      counts = map count allDirs ++ map (count . reverse) allDirs
-   in sum counts
+part1 xs = sum . map (sum . map count) $ (allDiags xs ++ allDir xs)
+  where
+    allDir xs = [xs, transpose xs, map reverse xs, (map reverse . transpose) xs]
+    allDiags xs = map diagonals [xs, transpose xs, map reverse xs, (reverse . transpose) xs]
 
 part2 :: Input -> Int
 part2 = length . filter id . map isCross . submatrices 3
