@@ -13,15 +13,11 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 
 type Input = [String]
-
 type Coord = (Int, Int)
 
 gridCoords :: String -> [(Coord, Char)]
 gridCoords str =
-  let rows = zip [0 ..] (lines str)
-      cols = map (second (zip [0 ..])) rows
-      mapped = [((a, x), y) | (a, b) <- cols, (x, y) <- b]
-   in mapped
+  [((i, j), c) | (i, r) <- zip [0 ..] (lines str), (j, c) <- zip [0 ..] r]
 
 walk :: Set Coord -> (Coord, Coord) -> (Coord, Coord)
 walk obs (pos@(i, j), dir@(di, dj))
