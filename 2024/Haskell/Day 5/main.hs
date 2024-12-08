@@ -4,28 +4,33 @@
 module Main where
 
 import Control.Arrow ((&&&))
-import Data.List.Split (splitOn)
-import Data.Map (Map, fromList, (!), findWithDefault, member, fromListWith, toList)
+import Data.Bifunctor (second)
+import Data.Function (on)
 import Data.List (sortBy)
+import Data.List.Split (splitOn)
+import Data.Map (Map, findWithDefault, fromList, fromListWith, member, toList, (!))
 
 type Input = [String]
 
 isOrdered :: Map Int [Int] -> [Int] -> Bool
 isOrdered rules update = all good updateIs
-  where updateIs = zip update [0..]
-        iMap = fromList updateIs
-        good (page, i) = all (i < ) rulesIs
-          where pageRules = findWithDefault [] page rules
-                rulesIs = map (iMap !) . filter (`member` iMap) $ pageRules
+  where
+    updateIs = zip update [0 ..]
+    iMap = fromList updateIs
+    good (page, i) = all (i <) rulesIs
+      where
+        pageRules = findWithDefault [] page rules
+        rulesIs = map (iMap !) . filter (`member` iMap) $ pageRules
 
 getMid :: [Int] -> Int
 getMid xs = xs !! div (length xs) 2
 
 sortPages :: Map Int [Int] -> [Int] -> [Int]
-sortPages rules update = let relevant' = filter ((`elem` update) . fst) . toList $ rules
-                             relevant = map (\(a,b) -> (a, filter (`elem` update) b)) relevant'
-                             sorted = sortBy (\(_,a) (_,b) -> compare (length b) (length a)) relevant
-                         in map fst sorted
+sortPages rules update =
+  let relevant' = filter ((`elem` update) . fst) . toList $ rules
+      relevant = map (second (filter (`elem` update))) relevant'
+      sorted = sortBy (flip compare `on` length . snd) relevant
+   in map fst sorted
 
 part1 :: [String] -> Int
 part1 xs =
@@ -39,8 +44,7 @@ part2 xs =
   let [rules', updates'] = map lines xs
       rules :: Map Int [Int] = fromListWith (++) . map ((\[a, b] -> (read a, [read b])) . splitOn "|") $ rules'
       updates :: [[Int]] = map (map read . splitOn ",") updates'
-      filtered = filter (not . isOrdered rules) updates
-      in sum . map (getMid . sortPages rules) $ filtered
+   in sum . map (getMid . sortPages rules) . filter (not . isOrdered rules) $ updates
 
 prepare :: String -> Input
 prepare = splitOn "\n\n"
