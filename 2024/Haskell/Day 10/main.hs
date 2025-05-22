@@ -7,10 +7,9 @@ import Data.Bifunctor (bimap)
 import Data.Char (digitToInt)
 import Data.Ix (inRange)
 import Data.Map (Map, (!))
+import Data.Map qualified as M
 import Data.Set (Set)
-
-import qualified Data.Map as M
-import qualified Data.Set as S
+import Data.Set qualified as S
 
 type Input = [String]
 
